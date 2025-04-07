@@ -254,39 +254,6 @@ cleanup:
 }
 
 /*
- * Create/extract symbolic link from the archive.
- */
-static int
-pyi_arch_create_symlink(const ARCHIVE_STATUS *status, const TOC *ptoc)
-{
-    char *link_target = NULL;
-    char link_name[PATH_MAX];
-    int rc = -1;
-
-    /* Extract symlink target */
-    link_target = (char *) pyi_arch_extract(status, ptoc);
-    if (!link_target) {
-        goto cleanup;
-    }
-
-    /* Ensure parent path exists */
-    if (pyi_create_parent_directory(status->temppath, ptoc->name) < 0) {
-        goto cleanup;
-    }
-
-    /* Create the symbolic link */
-    if (snprintf(link_name, PATH_MAX, "%s%c%s", status->temppath, PYI_SEP, ptoc->name) >= PATH_MAX) {
-        goto cleanup;
-    }
-    rc = pyi_path_mksymlink(link_target, link_name);
-
-cleanup:
-    free(link_target);
-
-    return rc;
-}
-
-/*
  * Extract an archive entry into file in the temporary directory.
  * The temporary directory must be initialized via `pyi_arch_create_tempdir`
  * before this function is called.
@@ -302,15 +269,6 @@ pyi_arch_extract2fs(const ARCHIVE_STATUS *status, const TOC *ptoc)
     if (status->has_temp_directory != true) {
         FATALERROR("pyi_arch_extract2fs was called before temporary directory was initialized!\n");
         return -1;
-    }
-
-    /* Handle symbolic links */
-    if (ptoc->typcd == ARCHIVE_ITEM_SYMLINK) {
-        rc = pyi_arch_create_symlink(status, ptoc);
-        if (rc < 0) {
-            FATALERROR("Failed to create symbolic link %s!\n", ptoc->name);
-        }
-        return rc;
     }
 
     /* Open target file */
@@ -511,7 +469,7 @@ pyi_arch_setup(ARCHIVE_STATUS *status, char const *archive_path, char const *exe
     ptoc = status->tocbuff;
     while (ptoc < status->tocend) {
         if (ptoc->typcd == ARCHIVE_ITEM_BINARY || ptoc->typcd == ARCHIVE_ITEM_DATA ||
-            ptoc->typcd == ARCHIVE_ITEM_ZIPFILE || ptoc->typcd == ARCHIVE_ITEM_SYMLINK) {
+            ptoc->typcd == ARCHIVE_ITEM_ZIPFILE) {
             status->needs_to_extract = true; /* onefile mode */
             break;
         }

@@ -213,8 +213,7 @@ _exception_dialog_initialze(DIALOG_CONTEXT *dialog)
     /* Load the icon; LoadIconMetric() gives modern icon, but requires
      * Microsoft.Windows.Common-Controls version='6.0.0.0' dependency
      * in the manifest. */
-    // dialog->hErrorIcon = LoadIconW(NULL, MAKEINTRESOURCEW(IDI_ERROR));
-    LoadIconMetric(NULL, MAKEINTRESOURCEW(IDI_ERROR), LIM_LARGE, &dialog->hErrorIcon);
+    dialog->hErrorIcon = LoadIconW(NULL, IDI_ERROR);
 
     /*
      * Create UI controls
