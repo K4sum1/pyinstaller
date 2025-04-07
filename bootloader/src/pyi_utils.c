@@ -193,7 +193,7 @@ pyi_setenv(const char *variable, const char *value)
 
     // Not sure why, but SetEnvironmentVariableW() didn't work with _wtempnam()
     // Replaced it with _wputenv_s()
-    rc = _wputenv_s(wvar, wval);
+    rc = SetEnvironmentVariableW(wvar, wval);
 
     free(wvar);
     free(wval);
@@ -306,7 +306,7 @@ pyi_create_tempdir(char *buffer, const char *runtime_tmpdir)
           return 0;
       }
       // Store in the TMP environment variable
-      rc = _wputenv_s(L"TMP", wruntime_tmpdir_abspath);
+      rc = SetEnvironmentVariableW(L"TMP", wruntime_tmpdir_abspath);
       free(wruntime_tmpdir_abspath);
       if (rc) {
           FATALERROR("LOADER: Failed to set the TMP environment variable.\n");
